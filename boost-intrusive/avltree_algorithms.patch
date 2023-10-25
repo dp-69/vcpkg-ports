@@ -1,0 +1,66 @@
+diff --git a/include/boost/intrusive/avltree_algorithms.hpp b/include/boost/intrusive/avltree_algorithms.hpp
+index 8195490..7b3ce5d 100644
+--- a/include/boost/intrusive/avltree_algorithms.hpp
++++ b/include/boost/intrusive/avltree_algorithms.hpp
+@@ -432,7 +432,12 @@ class avltree_algorithms
+       return verify_recursion(NodeTraits::get_parent(header), count, height);
+    }
+ 
+-   private:
++
++   /**
++     * \brief replaced private specifier with protected
++     * \author Dmytro Petrovskyy (dmytro.petrovsky@gmail.com | https://www.linkedin.com/in/dmytro-petrovskyy/)
++     */
++   protected:
+ 
+    static bool verify_recursion(node_ptr n, std::size_t &count, std::size_t &height)
+    {
+@@ -560,9 +565,23 @@ class avltree_algorithms
+       }
+    }
+ 
++   /**
++     * \brief Satisfies the reference interface
++     * \author Dmytro Petrovskyy (dmytro.petrovsky@gmail.com | https://www.linkedin.com/in/dmytro-petrovskyy/)
++     */
+    static void rebalance_after_insertion(node_ptr header, node_ptr x) BOOST_NOEXCEPT
+    {
+       NodeTraits::set_balance(x, NodeTraits::zero());
++      rebalance_after_insertion_no_balance_assignment(header, x);
++   }
++
++   /**
++     * \brief More specific rebalancing after insertion. Does not assign zero balance to parameter x
++     * \return avl rotation occurrence status
++     * \author Dmytro Petrovskyy (dmytro.petrovsky@gmail.com | https://www.linkedin.com/in/dmytro-petrovskyy/)
++     */
++   static bool rebalance_after_insertion_no_balance_assignment(node_ptr header, node_ptr x) BOOST_NOEXCEPT
++   {
+       // Rebalance.
+       for(node_ptr root = NodeTraits::get_parent(header); x != root; root = NodeTraits::get_parent(header)){
+          node_ptr const x_parent(NodeTraits::get_parent(x));
+@@ -585,7 +604,7 @@ class avltree_algorithms
+                else
+                   avl_rotate_left(x_parent, x, header);
+             }
+-            break;
++            return true;
+          }
+          else if(x_parent_balance == NodeTraits::negative()){
+             // if x is a left child, needs rebalancing
+@@ -597,12 +616,13 @@ class avltree_algorithms
+             }
+             else
+                NodeTraits::set_balance(x_parent, NodeTraits::zero());
+-            break;
++            return true;
+          }
+          else{
+             BOOST_INTRUSIVE_INVARIANT_ASSERT(false);  // never reached
+          }
+       }
++      return false;
+    }
+ 
+    static void left_right_balancing(node_ptr a, node_ptr b, node_ptr c) BOOST_NOEXCEPT
